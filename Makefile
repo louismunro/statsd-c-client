@@ -1,7 +1,7 @@
 major_version=2
 version=$(major_version).0.1
 
-LOCAL_DIR=/usr/local
+LOCAL_DIR=/usr
 LIB_DIR=$(LOCAL_DIR)/lib
 INCLUDE_DIR=$(LOCAL_DIR)/include/statsd
 CCFLAGS=
@@ -22,7 +22,7 @@ ifeq ($(OS),Windows_NT)
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
-        CCFLAGS += -D LINUX
+        CCFLAGS += -D LINUX -Wl,-soname,libstatsdclient.so.$(major_version)
     endif
     ifeq ($(UNAME_S),Darwin)
         CCFLAGS += -install_name $(LIBNAME) -D OSX
@@ -59,9 +59,9 @@ libstatsdclient.so:	statsd-client.c
 install: lib
 	cp libstatsdclient.so.$(version) $(LIB_DIR)
 	ln -sf $(LIB_DIR)/libstatsdclient.so.$(version) $(LIB_DIR)/$(LIBNAME)
-	ln -sf $(LIB_DIR)/libstatsdclient.so.$(version) $(LIB_DIR)/$(LIBNAME).$(major_version)
 	mkdir -p $(INCLUDE_DIR)
 	cp statsd-client.h $(INCLUDE_DIR)
+	ldconfig
 
 clean:
 	rm -f *.o *.so* test-client uptimed
